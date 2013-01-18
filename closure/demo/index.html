@@ -1,0 +1,234 @@
+<!doctype html>
+<html>
+<head>
+  <script type="text/javascript">var _sf_startpt=(new Date()).getTime()</script>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <title>TypeScript/Google Closure Demo</title>
+  <style>
+body {
+  font: 13px Helvetica, Arial, sans-serif;
+  margin: 8px;
+}
+
+h1 {
+  font-size: 18px;
+}
+
+code {
+  color: green;
+}
+
+.learn-more {
+  color: blue;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.control-container {
+  display: inline-block;
+}
+
+.error-container {
+  text-align: center;
+}
+
+.controls {
+  padding-bottom: 3px;
+}
+
+#intro-more {
+  width: 1004px;
+}
+
+.detailed-intro {
+  width: 700px;
+}
+
+.detailed-intro p:last-child {
+  margin-bottom: 0;
+}
+
+#definitive-guide {
+  border: 1px solid #ccc;
+  float: right;
+  top: 0;
+  right: 0;
+}
+
+#error {
+  color: white;
+  background: #A00;
+  font-weight: bold;
+  padding: 4px;
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
+
+  /* May get multiline errors from the TypeScript parser. */
+  display: inline-block;
+  white-space: pre-wrap;
+  line-height: 18px;
+  text-align: left;
+}
+
+.error {
+  color: #A00 !important;
+}
+
+#code-coffee, #code-js {
+  display: inline-block;
+  border-color: #E8E8E8;
+  border-style: solid;
+  border-width: 1px 0;
+}
+
+#code-coffee, #code-js, #code-coffee > div, #code-js > div {
+  width: 500px;
+}
+  </style>
+</head>
+<body>
+
+<h1>TypeScript to Closure</h1>
+
+<div class="intro">
+  This is a demo that translates <a href="http://typescript.codeplex.com/">TypeScript</a>
+  to Closure-Compiler-friendly JavaScript. <span class="learn-more" onclick="var el=document.getElementById('intro-more'); el.style.display = el.style.display == 'none' ? '' : 'none' ">Learn more</span>
+  <div id="intro-more" style="display: none">
+    <div id="definitive-guide">
+      <a href="http://www.amazon.com/gp/product/1449381871?ie=UTF8&tag=bolinfestcom-20&link_code=as3&camp=211189&creative=373489&creativeASIN=1449381871" target="_blank">
+        <img src="http://plovr.com/cover_big.png" width="200px" border="0" title="Closure: The Definitive Guide">
+      </a>
+    </div>
+    <div class="detailed-intro">
+    <p>
+    One of the primary complaints about the
+    <a href="https://developers.google.com/closure/library/">Closure Library</a> is
+    that the type annotations are verbose, so one way to address this problem is
+    to generate Closure-Library-style code using a more minimalistic
+    syntax (i.e. TypeScript). This makes it possible to leverage the
+    <a href="https://developers.google.com/closure/compiler/docs/api-tutorial3">
+    Advanced mode</a> of the Closure Compiler (and the existing functions in the
+    Closure Library) while writing much less code.
+    This demo is powered by a <a href="https://github.com/bolinfest/typescript/">
+    fork of the TypeScript codebase</a> that adds a <code>--google</code> option to
+    the <code>tsc</code> executable to generate the Closure-style JavaScript.
+    <p>
+    Previously, I built a <a href="http://bolinfest.com/coffee/">similar prototype for CoffeeScript</a>,
+    which contains <a href="http://bolinfest.com/coffee/features.html">a more detailed explanation
+    of the motivation behind this approach</a>. Unfortunately, my fork of CoffeeScript was hard to
+    maintain because it required making modifications to the CoffeeScript grammar. These changes then
+    had to be propagated all the way through the AST and code generation logic.
+    Given the high rate of change to CoffeeScript and the number of places I had to integrate into the
+    CoffeeScript codebase, I found it difficult to create clean, maintainable integration points.
+    <p>
+    By comparison, TypeScript already supports the primary language feature that I want (optional type annotations),
+    so I did not need to hack up the grammar as I did for CoffeeScript.
+    Most of my changes to TypeScript were made to the code generation logic in <code>emitter.ts</code>; however,
+    they could be localized to a subclass of <code>Emitter</code>. This would make it easier to maintain
+    my fork while continuing to pull in changes from the master branch.
+    (Though at the time of this writing, 2013-01-01, the TypeScript repository has not seen a
+    new commit in over a month, so incorporating upstream changes is not an issue.)
+    I am not sure how open the TypeScript team would be to adding hooks for this sort of thing in
+    TypeScript, but if they are, I would be happy to put together a pull request.
+    </div>
+  </div>
+</div>
+
+<div class="control-container">
+
+  <div>
+    <div class="error-container">
+      <span id="error"></span>
+    </div>
+    <div class="controls">
+      <div style="float: left">
+        <b>Edit TypeScript code on the left and JavaScript will
+        automatically be generated on the right.</b>
+      </div>
+      <div style="float:right">
+        <label>
+          <input id="enable-google" type="checkbox" checked>
+              Generate Google-Closure style JavaScript 
+        </label>
+      </div>
+      <div style="clear:both"></div>
+    </div>
+  </div>
+
+  <div id="code-container">
+    <div id="code-coffee"><div
+>class Animal {
+  constructor(public name) { }
+  move(meters) {
+    alert(this.name + " moved " + meters + "m.");
+  }
+}
+
+class Snake extends Animal {
+  constructor(name) { super(name); }
+  move() {
+    alert("Slithering...");
+    super.move(5);
+  }
+}
+
+class Horse extends Animal {
+  constructor(name) { super(name); }
+  move() {
+    alert("Galloping...");
+    super.move(45);
+  }
+}
+
+var sam = new Snake("Sammy the Python")
+var tom: Animal = new Horse("Tommy the Palomino")
+
+sam.move()
+tom.move(34)
+</div></div>
+    <div id="code-js"><div></div></div>
+  </div>
+
+</div>
+
+
+<script src="../../built/local/typescript.js"></script>
+<script src="externs.js"></script>
+<script src="http://bolinfest.com/ace-builds/src/ace.js" charset="utf-8"></script>
+<script src="http://bolinfest.com/ace-builds/src/mode-typescript.js" charset="utf-8"></script>
+<script src="http://bolinfest.com/ace-builds/src/mode-javascript.js" charset="utf-8"></script>
+<script src="http://bolinfest.com/ace-builds/src/theme-twilight.js" charset="utf-8"></script>
+<script src="http://resources.programmingclosure.com/closure-lite.js"></script>
+<script src="demo.js"></script>
+
+<script type="text/javascript">
+var _sf_async_config={uid:22053,domain:"bolinfest.com"};
+(function(){
+  function loadChartbeat() {
+    window._sf_endpt=(new Date()).getTime();
+    var e = document.createElement('script');
+    e.setAttribute('language', 'javascript');
+    e.setAttribute('type', 'text/javascript');
+    e.setAttribute('src',
+       (("https:" == document.location.protocol) ? "https://a248.e.akamai.net/chartbeat.download.akamai.com/102508/" : "http://static.chartbeat.com/") +
+       "js/chartbeat.js");
+    document.body.appendChild(e);
+  }
+  var oldonload = window.onload;
+  window.onload = (typeof window.onload != 'function') ?
+     loadChartbeat : function() { oldonload(); loadChartbeat(); };
+})();
+
+var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-1213368-1']);
+_gaq.push(['_trackPageview']);
+
+(function() {
+  var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+  ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+  var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+})();
+</script>
+
+</body>
+</html>
